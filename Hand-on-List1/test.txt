@@ -1,0 +1,2 @@
+Writing from Parent Process
+Writing from Child Process

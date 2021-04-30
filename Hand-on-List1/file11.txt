@@ -1,0 +1,4 @@
+Hello World
+Using dup
+Using dup2
+Using fcntl

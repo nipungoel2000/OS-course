@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
         exit(0);
     }
 
-    ret = listen(sd, 1); //sd,backlog
+    ret = listen(sd, 2); //sd,backlog
     if (ret < 0)
     {
         perror("Listen failure");
@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
     }
 
     printf("Connection Established Successfully\n");
-    //Iterative server
+
     int flag = 1;
     while (flag)
     {
@@ -56,12 +56,23 @@ int main(int argc, char *argv[])
             perror("Accept");
             exit(0);
         }
-        char buf[1024];
-        read(nsd, buf, sizeof(buf));
-        printf("Message From Client: %s\n", buf);
-
-        write(nsd, "I am Server", 12);
-        printf("Sent from server\n");
+        if (!fork()) //in child process
+        {
+            close(sd);
+            char buf[1024];
+            read(nsd, buf, sizeof(buf));
+            printf("Message From Client:  %s\n", buf);
+            char buff[1024];
+            printf("Enter your message: ");
+            scanf("%s", buff);
+            write(nsd, buff, sizeof(buff));
+            printf("Sent from server\n");
+            exit(0);
+        }
+        else
+        {
+            close(nsd);
+        }
     }
     close(sd);
     return 0;

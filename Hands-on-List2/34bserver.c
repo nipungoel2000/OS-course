@@ -5,9 +5,23 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <string.h>
+#include <pthread.h>
 
 struct sockaddr_in serv, cli;
 
+void *serveClient(void *args)
+{
+    int nsd = *(int *)args;
+    char buf[1024];
+    read(nsd, buf, sizeof(buf));
+    printf("Message From Client:  %s\n", buf);
+    char buff[1024];
+    printf("Enter your message: ");
+    scanf("%s", buff);
+    write(nsd, buff, sizeof(buff));
+    printf("Sent from server\n");
+    close(nsd);
+}
 int main(int argc, char *argv[])
 {
     int portno = atoi(argv[1]);
@@ -37,7 +51,7 @@ int main(int argc, char *argv[])
         exit(0);
     }
 
-    ret = listen(sd, 1); //sd,backlog
+    ret = listen(sd, 2); //sd,backlog
     if (ret < 0)
     {
         perror("Listen failure");
@@ -45,7 +59,7 @@ int main(int argc, char *argv[])
     }
 
     printf("Connection Established Successfully\n");
-    //Iterative server
+
     int flag = 1;
     while (flag)
     {
@@ -56,12 +70,13 @@ int main(int argc, char *argv[])
             perror("Accept");
             exit(0);
         }
-        char buf[1024];
-        read(nsd, buf, sizeof(buf));
-        printf("Message From Client: %s\n", buf);
 
-        write(nsd, "I am Server", 12);
-        printf("Sent from server\n");
+        pthread_t tid;
+        if (pthread_create(&tid, NULL, serveClient, (void *)&nsd) < 0)
+        {
+            perror("Thread Failure");
+            exit(0);
+        }
     }
     close(sd);
     return 0;

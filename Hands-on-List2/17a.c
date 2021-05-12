@@ -13,7 +13,7 @@ int main()
     int ret = fork();
     if (ret > 0) //parent process
     {
-        wait(0);
+        // wait(0);
         close(fd[1]); //close write end
         close(0);     //closing normal stdin
         dup(fd[0]);   //making STDIN same as fd[0]
